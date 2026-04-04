@@ -4,10 +4,12 @@ import { updateSearch, setPage } from './searchSlice';
 
 const SearchBar = () => {
   const [query, setQuery] = useState('');
+  const [isFocused, setIsFocused] = useState(false);
+
   const dispatch = useDispatch();
 
   const { results, currentPage, itemsPerPage, term } = useSelector((state) => state.search);
-
+  
   // Filter the results to only include things that match the query
   // Then take the top 5
   const filteredHits = results.filter(item => 
@@ -40,15 +42,24 @@ const SearchBar = () => {
           className="search-input"
           placeholder="Search artists, albums, or songs..."
           value={query}
-          // onChange={(e) => setQuery(e.target.value)}
+          onFocus={() => setIsFocused(true)}
+          // The timeout gives the 'click' on a suggestion time to fire
+          onBlur={() => setTimeout(() => setIsFocused(false), 200)}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') {
+              setIsFocused(false);
+              e.target.blur(); // Also removes the cursor from the box
+            }
+          }}
           onChange={(e) => {
             const value = e.target.value;
             setQuery(value); // Updates the text you see in the bar
             dispatch(updateSearch(value)); // Updates Redux so we get "hits"
           }}
+          
         />
 
-        {query.length > 0 && topFiveHits.length > 0 && (
+        {isFocused && query.length > 0 && topFiveHits.length > 0 && (
           <ul className="search-dropdown">
             {topFiveHits.map((hit) => (
               <li key={hit.id} className="dropdown-item">

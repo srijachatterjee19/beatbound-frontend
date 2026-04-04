@@ -7,6 +7,8 @@ const searchSlice = createSlice({
   initialState: {
     term: '',
     results: MUSIC_DATA,
+    currentPage: 1,
+    itemsPerPage: 4, 
   },
   reducers: {
     updateSearch: (state, action) => {
@@ -20,8 +22,11 @@ const searchSlice = createSlice({
         );
       });
     },
+    setPage: (state, action) => {
+      state.currentPage = action.payload;  // updates the global page number
+    }
   },
 });
 
-export const { updateSearch } = searchSlice.actions;
+export const { updateSearch, setPage } = searchSlice.actions;
 export default searchSlice.reducer; 

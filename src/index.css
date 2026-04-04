@@ -115,6 +115,24 @@ body {
   margin-bottom: 8px;
 }
 
+.pagination {
+  display: flex !important; /* Force it to show */
+  justify-content: center;
+  gap: 20px;
+  padding: 50px 0;
+  margin-top: 50px;
+  border: 2px solid red; /* Temporary red box to find it! */
+  background: #222;
+}
+
+.pagination button {
+  background: #1db954 !important; /* Bright Spotify Green */
+  color: black !important;
+  padding: 15px 30px !important;
+  z-index: 999;
+  cursor: pointer;
+}
+
 /* 7. Responsive Breakpoints */
 @media (max-width: 768px) {
   .title {

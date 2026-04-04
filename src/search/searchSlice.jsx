@@ -15,6 +15,7 @@ const searchSlice = createSlice({
         return (
           item.name.toLowerCase().includes(term) ||
           item.album.toLowerCase().includes(term) ||
+          item.genre.toLowerCase().includes(term) ||
           item.songs.some(song => song.toLowerCase().includes(term))
         );
       });

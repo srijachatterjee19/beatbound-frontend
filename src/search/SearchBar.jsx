@@ -3,9 +3,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { updateSearch, setPage } from './searchSlice';
 import { MUSIC_DATA } from '../data/mockData';
 
-const SearchCard = memo(({ item }) => {
+const SearchCard = memo(({ item, index }) => {
   return (
-    <div className="card">
+    <div className="card card-animate" style={{ animationDelay: `${index * 0.05}s` }}>
       <div className="album-placeholder">
         <span className="placeholder-icon">♪</span>
       </div>
@@ -141,8 +141,8 @@ const SearchBar = () => {
       </div>
 
       <div className="results-grid">
-        {currentItems.map((item) => (
-          <SearchCard key={item.id} item={item} />
+        {currentItems.map((item, index) => (
+          <SearchCard key={item.id} item={item} index={index} />
         ))}
       </div>
 

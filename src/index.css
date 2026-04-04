@@ -63,6 +63,8 @@ body {
 }
 
 .card {
+  min-height: 120px;
+  justify-content: center;
   background-color: #181818;
   border-radius: 12px;
   padding: 24px;
@@ -84,12 +86,13 @@ body {
 
 /* Meta info (Album + Genre) */
 .meta-info {
-  margin: 12px 0;
+  margin-top: 4px;
   display: flex;
   align-items: center;
   flex-wrap: wrap; /* Prevents text clumping on small cards */
   gap: 12px;
   color: #b3b3b3;
+  justify-content: space-between; /* Pushes Genre to the right side */
 }
 
 .genre-tag {

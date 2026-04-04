@@ -9,7 +9,8 @@ const SearchBar = () => {
   const [isFocused, setIsFocused] = useState(false);
   const [query, setQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
-  
+  const [activeSearchTerm, setActiveSearchTerm] = useState('');
+
   const {results = [] , currentPage = 1, itemsPerPage = 12} = useSelector((state) => state.search);
 
   useEffect(() => {
@@ -34,6 +35,7 @@ const SearchBar = () => {
 
   const handleFinalSearch = (searchTerm) => {
     dispatch(updateSearch(searchTerm)); 
+    setActiveSearchTerm(searchTerm);
   };
     
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -93,18 +95,15 @@ const SearchBar = () => {
                   ))}
                 </div>
 
-                {/* If there are more than 4, show the 'See All' button */}
-                {allMatches.length > 4 && (
-                  <button 
-                    className="see-all-results" 
-                    onMouseDown={() => {
-                      handleFinalSearch(debouncedQuery);
-                      setIsFocused(false);
-                    }}
-                  >
-                    See all {allMatches.length} results
-                  </button>
-                )}
+                <button 
+                  className="see-all-results" 
+                  onMouseDown={() => {
+                    handleFinalSearch(debouncedQuery);
+                    setIsFocused(false);
+                  }}
+                >
+                  See all {allMatches.length} results
+                </button>
               </>
             ) : (
               <p className="no-results">No matches found</p>
@@ -113,6 +112,16 @@ const SearchBar = () => {
         )}
       </div>
   
+      <div className="results-status">
+        {activeSearchTerm ? (
+          <h2 className="results-title">
+            Showing {results.length} results for "{activeSearchTerm}"
+          </h2>
+        ) : (
+          <h2 className="results-title">All Albums</h2>
+        )}
+      </div>
+
       <div className="results-grid">
         {currentItems.map((item) => (
           <div key={item.id} className="card">

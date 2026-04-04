@@ -38,8 +38,9 @@ body {
   display: block !important; /* Force visibility for testing */
   width: 100%;
   max-width: 500px; /* Limit the width of the search bar */
-  margin: 0 auto 40px;
   text-align: left; /* Aligns search bar to the left with the title */
+  max-width: 100%; 
+  margin: 0 0 40px 0; /* Remove 'auto' to stop centering it */
 }
 
 .search-dropdown {
@@ -102,7 +103,7 @@ body {
 
 .search-input {
   width: 100%;
-  max-width: 500px;
+  max-width: 100%;
   padding: 12px 20px;
   border-radius: 8px;
   border: 1px solid #333;
@@ -110,6 +111,7 @@ body {
   color: white;
   outline: none;
   transition: border-color 0.2s;
+  box-sizing: border-box;
 }
 
 .search-input:focus {
@@ -126,22 +128,23 @@ body {
 
 .album-placeholder {
   width: 100%;
-  aspect-ratio: 1 / 1;
-  background-color: #282828; /* Spotify-style dark grey */
+  aspect-ratio: 1 / 1; /* Forces the height to always match the width */
+  background-color: #282828;
   border-radius: 4px;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
+  /* Ensures the music note doesn't get too big */
+  position: relative; 
+  /* shimmer inside the box */
   overflow: hidden;
 }
 
-/* Optional: The music note icon in the center */
 .placeholder-icon {
-  font-size: 2rem;
-  color: #181818;
-  user-select: none;
+  font-size: 1.5rem; /* Slightly smaller for the 2-column mobile view */
+  color: #1a1a1a;
+  opacity: 0.6;
 }
 
 /* Optional: Subtle pulse animation */
@@ -298,12 +301,45 @@ body {
   }
 
   .results-grid {
-    /* On tiny phones, show 2 columns */
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+    /* On tiny phones, show 1 column */
+    grid-template-columns: repeat(2, 1fr); 
+    gap: 12px; /* Tighter gap looks better on small screens */
+    padding: 0 10px;
+    /* max-width: 400px; */
+    /* margin: 0 auto; */
   }
 
   .container {
     padding: 15px;
+  }
+
+  .card {
+    padding: 10px; /* Smaller padding to save space for the content */
+  }
+
+  .album-title {
+    font-size: 0.85rem; /* Shrink text so it doesn't wrap awkwardly */
+  }
+
+  .artist-name {
+    font-size: 0.75rem;
+  }
+}
+
+/* On very small phones, switch to a single column layout and adjust spacing */
+@media (max-width: 700px) {
+  .results-grid {
+    grid-template-columns: 1fr; /* Forces single card */
+    gap: 20px;
+    padding: 0 10px;
+  }
+
+  .search-wrapper {
+    margin-bottom: 25px; /* Tighter spacing for mobile */
+  }
+
+  .album-title {
+    font-size: 1.1rem; /* Make text bigger since there is more room now */
+    white-space: normal; /* Let the title wrap if it's long */
   }
 }

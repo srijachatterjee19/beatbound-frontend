@@ -37,6 +37,10 @@ const SearchBar = () => {
       <div className="results-grid">
         {currentItems.map((artist) => (
           <div key={artist.id} className="card">
+            <div className="album-placeholder">
+              <span className="placeholder-icon">♪</span>
+            </div>
+
             <h2 className="album-title">{artist.album}</h2>
       
             <div className="meta-info">

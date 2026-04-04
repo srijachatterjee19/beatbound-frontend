@@ -56,10 +56,57 @@ body {
 
 .results-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
+  
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  /* grid-template-columns: repeat(2, 1fr); */
+  gap: 16px;
   align-items: start;
   padding-bottom: 50px;
+}
+
+.album-placeholder {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background-color: #282828; /* Spotify-style dark grey */
+  border-radius: 4px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Optional: The music note icon in the center */
+.placeholder-icon {
+  font-size: 2rem;
+  color: #181818;
+  user-select: none;
+}
+
+/* Optional: Subtle pulse animation */
+.album-placeholder::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  transform: translateX(-100%);
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0,
+    rgba(255, 255, 255, 0.03) 20%,
+    rgba(255, 255, 255, 0.05) 60%,
+    rgba(255, 255, 255, 0)
+  );
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 .card {
@@ -67,11 +114,20 @@ body {
   justify-content: center;
   background-color: #181818;
   border-radius: 12px;
-  padding: 24px;
+  padding: 12px;
   border: 1px solid #282828;
   display: flex;
   flex-direction: column;
   transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.album-title {
+  font-size: 0.95rem;
+  margin: 0 0 4px 0;
+  /* Truncate text if the album name is too long */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .card:hover {
@@ -175,11 +231,12 @@ body {
   }
 
   .results-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
+    /* On tiny phones, show 2 columns */
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
   }
 
   .container {
-    padding: 20px;
+    padding: 15px;
   }
 }

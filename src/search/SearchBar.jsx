@@ -55,19 +55,23 @@ const SearchBar = () => {
       {totalPages > 1 && (
         <div className="pagination"> 
           <button 
+            className="pagination-btn" 
             disabled={currentPage === 1} 
             onClick={() => dispatch(setPage(currentPage - 1))}
           >
-            Previous
+            ← Prev
           </button>
-
-          <span>Page {currentPage} of {totalPages}</span>
-
+          
+          <span className="page-info">
+            {currentPage} / {totalPages}
+          </span>
+          
           <button 
+            className="pagination-btn" 
             disabled={currentPage === totalPages} 
             onClick={() => dispatch(setPage(currentPage + 1))}
           >
-            Next
+            Next →
           </button>
         </div> 
       )}

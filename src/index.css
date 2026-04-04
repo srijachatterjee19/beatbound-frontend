@@ -116,21 +116,53 @@ body {
 }
 
 .pagination {
-  display: flex !important; /* Force it to show */
+  display: flex;
   justify-content: center;
-  gap: 20px;
-  padding: 50px 0;
+  align-items: center;
+  gap: 16px;
   margin-top: 50px;
-  border: 2px solid red; /* Temporary red box to find it! */
-  background: #222;
+  padding-bottom: 60px;
 }
 
-.pagination button {
-  background: #1db954 !important; /* Bright Spotify Green */
-  color: black !important;
-  padding: 15px 30px !important;
-  z-index: 999;
+.pagination-btn {
+  background-color: #282828;
+  color: #ffffff;
+  border: 1px solid #3e3e3e;
+  padding: 10px 24px;
+  border-radius: 50px; /* Pill shape */
+  font-weight: 600;
+  font-size: 0.9rem;
   cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 100px;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background-color: #1db954; /* Spotify Green */
+  color: #000000;
+  border-color: #1db954;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(29, 185, 84, 0.3);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  filter: grayscale(1);
+}
+
+.page-info {
+  font-size: 0.85rem;
+  color: #b3b3b3;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 8px 16px;
+  border-radius: 20px;
 }
 
 /* 7. Responsive Breakpoints */

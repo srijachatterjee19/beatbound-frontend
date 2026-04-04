@@ -25,11 +25,27 @@ body {
 }
 
 /* 3. Header & Search Bar */
-.title {
+.app-header {
+  margin-bottom: 40px;
   text-align: left;
-  font-size: 2.5rem;
-  margin-bottom: 20px;
+}
+
+.title {
+  font-size: 3.5rem;
+  font-weight: 900;
+  margin: 0;
+  letter-spacing: -2px;
   color: #ffffff;
+  text-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.subtitle {
+  font-size: 1.1rem;
+  color: #1db954; 
+  margin-top: 4px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  opacity: 0.9;
 }
 
 .search-wrapper {
@@ -100,9 +116,48 @@ body {
   border-radius: 50%;
 }
 
+.search-suggestions-container {
+  position: absolute;
+  width: 100%;
+  background: #222;
+  border-radius: 8px;
+  padding: 10px;
+  z-index: 1000;
+}
+
+.mini-results-grid {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+}
+
+.mini-result-item {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  background: #333;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.mini-result-item:hover {
+  background: #444;
+}
+
+.see-all-results {
+  width: 100%;
+  padding: 8px;
+  background: transparent;
+  border: 1px solid #1db954;
+  color: #1db954;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
 .search-input {
   width: 100%;
   max-width: 100%;
+  text-align: left;
   padding: 12px 20px;
   border-radius: 8px;
   border: 1px solid #333;

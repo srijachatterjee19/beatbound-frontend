@@ -1,41 +1,52 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateSearch, setPage } from './searchSlice';
+import { MUSIC_DATA } from '../data/mockData';
+
 
 const SearchBar = () => {
-  const [query, setQuery] = useState('');
-  const [isFocused, setIsFocused] = useState(false);
-
   const dispatch = useDispatch();
-
-  const { results, currentPage, itemsPerPage, term } = useSelector((state) => state.search);
+  const [isFocused, setIsFocused] = useState(false);
+  const [query, setQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
   
-  // Filter the results to only include things that match the query
-  // Then take the top 5
-  const filteredHits = results.filter(item => 
-    item.album.toLowerCase().includes(query.toLowerCase()) || 
-    item.name.toLowerCase().includes(query.toLowerCase())
-  );
-  // Only show suggestions if there is actually a search term
-  const topFiveHits = query.length > 0 ? filteredHits.slice(0, 5) : [];
+  const {results = [] , currentPage = 1, itemsPerPage = 12} = useSelector((state) => state.search);
 
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedQuery(query);
+    }, 100);
+    return () => clearTimeout(handler);
+  }, [query]);
+
+  // Unified filtering logic: Get ALL matches for the "See all" count
+  const allMatches = debouncedQuery.length > 0 
+    ? MUSIC_DATA.filter(item => 
+        item.album?.toLowerCase().includes(debouncedQuery.toLowerCase()) || 
+        item.name?.toLowerCase().includes(debouncedQuery.toLowerCase()) ||
+        item.genre?.toLowerCase().includes(debouncedQuery.toLowerCase()) ||
+        item.songs?.some(song => song.toLowerCase().includes(debouncedQuery.toLowerCase()))
+      )
+    : [];
+
+  // Slice exactly the top 4 for the search container display
+  const topFourHits = allMatches.slice(0, 4);
+
+  const handleFinalSearch = (searchTerm) => {
+    dispatch(updateSearch(searchTerm)); 
+  };
+    
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = results.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(results.length / itemsPerPage);
-
-  // console.log("Results Length:", results.length);
-  // console.log("Items Per Page:", itemsPerPage);
-  // console.log("Total Pages:", Math.ceil(results.length / itemsPerPage));
-  // console.log("Top Five Hits:", topFiveHits);
-
-  useEffect(() => {
-    dispatch(updateSearch(query));
-  }, [query, dispatch]);
-
+  
   return (
     <div className="container">
-      <h1 className="title">Music Discovery</h1>
+      <header className="app-header">
+        <h1 className="title">Beatbound</h1>
+        <p className="subtitle">Where every beat tells a story</p>
+      </header>
       <div className="search-wrapper">
         <input
           type="text"
@@ -44,55 +55,75 @@ const SearchBar = () => {
           value={query}
           onFocus={() => setIsFocused(true)}
           // The timeout gives the 'click' on a suggestion time to fire
-          onBlur={() => setTimeout(() => setIsFocused(false), 200)}
+          onBlur={() => setTimeout(() => setIsFocused(false), 500)}
           onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              handleFinalSearch(debouncedQuery); // GRID updates ONLY here
+            }
             if (e.key === 'Escape') {
               setIsFocused(false);
               e.target.blur(); // Also removes the cursor from the box
             }
           }}
-          onChange={(e) => {
-            const value = e.target.value;
-            setQuery(value); // Updates the text you see in the bar
-            dispatch(updateSearch(value)); // Updates Redux so we get "hits"
-          }}
-          
+          onChange={(e) => setQuery(e.target.value)} // ONLY updates the text/dropdown
         />
 
-        {isFocused && query.length > 0 && topFiveHits.length > 0 && (
-          <ul className="search-dropdown">
-            {topFiveHits.map((hit) => (
-              <li key={hit.id} className="dropdown-item">
-                <span className="dot"></span>
-                <div className="item-text">
-                  <span className="item-album">{hit.album}</span>
-                  <span className="item-artist">{hit.name}</span>
+        {/* Search Container: Shows Top 4 hits as the user types */}
+        {isFocused && query.length > 0 && (
+          <div className="search-suggestions-container" >
+            {allMatches.length > 0 ? (
+              <>
+                <div className="mini-results-grid">
+                  {topFourHits.map((hit) => (
+                    <div 
+                      key={hit.id} 
+                      className="mini-result-item" 
+                      onMouseDown={() => {
+                        setQuery(hit.album);
+                        handleFinalSearch(hit.album);
+                        setIsFocused(false);
+                      }}
+                    >
+                      <div className="mini-art">♪</div>
+                      <div className="mini-text">
+                        <span className="mini-title">{hit.album}</span>
+                        <span className="mini-subtitle">{hit.name}</span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              </li>
-            ))}
-          </ul>
+
+                {/* If there are more than 4, show the 'See All' button */}
+                {allMatches.length > 4 && (
+                  <button 
+                    className="see-all-results" 
+                    onMouseDown={() => {
+                      handleFinalSearch(debouncedQuery);
+                      setIsFocused(false);
+                    }}
+                  >
+                    See all {allMatches.length} results
+                  </button>
+                )}
+              </>
+            ) : (
+              <p className="no-results">No matches found</p>
+            )}
+          </div>
         )}
       </div>
   
       <div className="results-grid">
-        {currentItems.map((artist) => (
-          <div key={artist.id} className="card">
+        {currentItems.map((item) => (
+          <div key={item.id} className="card">
             <div className="album-placeholder">
               <span className="placeholder-icon">♪</span>
             </div>
-
-            <h2 className="album-title">{artist.album}</h2>
-      
+            <h2 className="album-title">{item.album}</h2>
             <div className="meta-info">
-              <span className="artist-name">{artist.name}</span>
-              <span className="genre-tag">{artist.genre}</span>
+              <span className="artist-name">{item.name}</span>
+              <span className="genre-tag">{item.genre}</span>
             </div>
-            
-            {/* <ul className="song-list">
-              {artist.songs.map((song, i) => (
-                <li key={i} className="song-item">{song}</li>
-              ))}
-            </ul> */}
           </div>
         ))}
       </div>

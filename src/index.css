@@ -37,7 +37,6 @@ body {
   z-index: 100;        /* Gives the whole search area priority */
   display: block !important; /* Force visibility for testing */
   width: 100%;
-  max-width: 500px; /* Limit the width of the search bar */
   text-align: left; /* Aligns search bar to the left with the title */
   max-width: 100%; 
   margin: 0 0 40px 0; /* Remove 'auto' to stop centering it */
@@ -112,6 +111,8 @@ body {
   outline: none;
   transition: border-color 0.2s;
   box-sizing: border-box;
+  /* prevent the cursor from 'leaking' out */
+  overflow: hidden;
 }
 
 .search-input:focus {

@@ -6,7 +6,16 @@ const SearchBar = () => {
   const [query, setQuery] = useState('');
   const dispatch = useDispatch();
 
-  const { results, currentPage, itemsPerPage } = useSelector((state) => state.search);
+  const { results, currentPage, itemsPerPage, term } = useSelector((state) => state.search);
+
+  // Filter the results to only include things that match the query
+  // Then take the top 5
+  const filteredHits = results.filter(item => 
+    item.album.toLowerCase().includes(query.toLowerCase()) || 
+    item.name.toLowerCase().includes(query.toLowerCase())
+  );
+  // Only show suggestions if there is actually a search term
+  const topFiveHits = query.length > 0 ? filteredHits.slice(0, 5) : [];
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -16,6 +25,7 @@ const SearchBar = () => {
   // console.log("Results Length:", results.length);
   // console.log("Items Per Page:", itemsPerPage);
   // console.log("Total Pages:", Math.ceil(results.length / itemsPerPage));
+  // console.log("Top Five Hits:", topFiveHits);
 
   useEffect(() => {
     dispatch(updateSearch(query));
@@ -30,8 +40,27 @@ const SearchBar = () => {
           className="search-input"
           placeholder="Search artists, albums, or songs..."
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          // onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => {
+            const value = e.target.value;
+            setQuery(value); // Updates the text you see in the bar
+            dispatch(updateSearch(value)); // Updates Redux so we get "hits"
+          }}
         />
+
+        {query.length > 0 && topFiveHits.length > 0 && (
+          <ul className="search-dropdown">
+            {topFiveHits.map((hit) => (
+              <li key={hit.id} className="dropdown-item">
+                <span className="dot"></span>
+                <div className="item-text">
+                  <span className="item-album">{hit.album}</span>
+                  <span className="item-artist">{hit.name}</span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
   
       <div className="results-grid">

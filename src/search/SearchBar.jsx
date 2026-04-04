@@ -37,17 +37,18 @@ const SearchBar = () => {
       <div className="results-grid">
         {currentItems.map((artist) => (
           <div key={artist.id} className="card">
-            <h2>{artist.name}</h2>
+            <h2 className="album-title">{artist.album}</h2>
+      
             <div className="meta-info">
-              <span className="album-label">Album:</span> {artist.album} 
+              <span className="artist-name">{artist.name}</span>
               <span className="genre-tag">{artist.genre}</span>
             </div>
             
-            <ul className="song-list">
+            {/* <ul className="song-list">
               {artist.songs.map((song, i) => (
                 <li key={i} className="song-item">{song}</li>
               ))}
-            </ul>
+            </ul> */}
           </div>
         ))}
       </div>

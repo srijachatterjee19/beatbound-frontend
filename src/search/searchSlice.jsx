@@ -8,7 +8,7 @@ const searchSlice = createSlice({
     term: '',
     results: MUSIC_DATA,
     currentPage: 1,
-    itemsPerPage: 4, 
+    itemsPerPage: 10, 
   },
   reducers: {
     updateSearch: (state, action) => {

@@ -1,7 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,memo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateSearch, setPage } from './searchSlice';
 import { MUSIC_DATA } from '../data/mockData';
+
+const SearchCard = memo(({ item }) => {
+  return (
+    <div className="card">
+      <div className="album-placeholder">
+        <span className="placeholder-icon">♪</span>
+      </div>
+      <h2 className="album-title">{item.album}</h2>
+      <div className="meta-info">
+        <span className="artist-name">{item.name}</span>
+        <span className="genre-tag">{item.genre}</span>
+      </div>
+    </div>
+  );
+});
+
+// Set display name for better debugging in Profiler
+SearchCard.displayName = 'SearchCard';
 
 
 const SearchBar = () => {
@@ -124,16 +142,7 @@ const SearchBar = () => {
 
       <div className="results-grid">
         {currentItems.map((item) => (
-          <div key={item.id} className="card">
-            <div className="album-placeholder">
-              <span className="placeholder-icon">♪</span>
-            </div>
-            <h2 className="album-title">{item.album}</h2>
-            <div className="meta-info">
-              <span className="artist-name">{item.name}</span>
-              <span className="genre-tag">{item.genre}</span>
-            </div>
-          </div>
+          <SearchCard key={item.id} item={item} />
         ))}
       </div>
 

@@ -16,6 +16,22 @@ body {
   flex-direction: column;
 }
 
+h1, h2, h3, p, span {
+  user-select: none;
+}
+
+.player-pill, 
+.slider-container, 
+.slider-track, 
+.slider-thumb {
+  /* Stops the I-beam from appearing */
+  user-select: none;
+  -webkit-user-select: none;
+  
+  /* Forces the pointer hand */
+  cursor: pointer !important;
+}
+
 /* 2. Layout Container */
 .container {
   width: 100%;
@@ -190,6 +206,12 @@ body {
 }
 
 .search-input {
+  /* Hides the blinking cursor line */
+  caret-color: transparent;
+  /* Standard UI polish */
+  outline: none;
+  user-select: text;
+
   width: 100%;
   max-width: 100%;
   text-align: left;
@@ -330,6 +352,7 @@ body {
 }
 
 .card {
+  cursor: pointer;
   min-height: 120px;
   justify-content: center;
   background-color: #181818;
@@ -466,6 +489,89 @@ body {
   border-radius: 20px;
 }
 
+.player-wrapper {
+  position: fixed;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+}
+
+.player-pill {
+  background: #000;
+  width: 420px; /* Adjusted width for the simplified look */
+  padding: 25px 35px;
+  border-radius: 30px;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.slider-container {
+  width: 100%;
+  height: 4px;
+  position: relative;
+}
+
+.slider-track {
+  width: 100%;
+  height: 100%;
+  background: #333;
+  border-radius: 10px;
+}
+
+.slider-fill {
+  height: 100%;
+  background: #fff;
+  border-radius: 10px;
+}
+
+.slider-thumb {
+  width: 14px;
+  height: 14px;
+  background: #fff;
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.control-row-centered {
+  display: flex;
+  justify-content: center; /* Centers the trio */
+  align-items: center;
+  gap: 40px; /* Space between Back, Play, and Forward */
+}
+
+.play-circle {
+  background: #fff;
+  color: #000;
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.play-circle:hover {
+  transform: scale(1.05);
+}
+
+.cursor-pointer {
+  cursor: pointer;
+  opacity: 0.9;
+}
+
+.cursor-pointer:hover {
+  opacity: 1;
+}
+
 /* 7. Responsive Breakpoints */
 @media (max-width: 768px) {
   .title {
@@ -514,4 +620,5 @@ body {
     font-size: 1.1rem; /* Make text bigger since there is more room now */
     white-space: normal; /* Let the title wrap if it's long */
   }
+  
 }

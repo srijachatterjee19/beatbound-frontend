@@ -382,18 +382,28 @@ h1, h2, h3, p, span {
   text-align: left;
 }
 
+.card-subtitle-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+
 .album-title {
   font-size: 0.95rem;
-  margin: 0 0 4px 0;
   /* Truncate text if the album name is too long */
+  margin-bottom: 16px; 
+  line-height: 1.2;
+
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .artist-name {
-  font-size: 0.8rem;
-  margin-top: auto; /* Pushes the artist name to the bottom if there is extra space */
+  font-size: 0.9rem;
+  color: #a7a7a7;
+  margin-right: 10px; 
 }
 
 @keyframes fadeInUp {
@@ -434,15 +444,17 @@ h1, h2, h3, p, span {
 
 .genre-tag {
   position: absolute;
-  bottom: 16px;
-  right: 16px;
+  bottom: 12px;
+  right: 12px;
   background: #333;
-  padding: 4px 10px;
+  padding: 4px 4px;
+  margin-top: 4px;
   border-radius: 4px;
   font-size: 0.75rem;
   color: #1db954;
   text-transform: uppercase;
   font-weight: bold;
+  line-height: 1;
 }
 
 /* 6. Song List */
@@ -648,6 +660,7 @@ main, .results-grid {
     align-items: flex-start;
     flex: 1;
     overflow: hidden;
+    gap: 8px;
   }
 
   .album-title {

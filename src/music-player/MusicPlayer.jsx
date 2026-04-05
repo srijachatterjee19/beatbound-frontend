@@ -21,8 +21,14 @@ const MusicPlayer = () => {
 
   return (
     <div className="player-wrapper">
-  <div className="player-pill">
-    {/* 1. Progress Slider Section */}
+        <div className="player-pill">
+        {/* 1. Album and Artist Info (New) */}
+        <div className="player-info">
+            <p className="player-album-name">Abbey Road</p>
+            <p className="player-artist-name">The Beatles</p>
+        </div>
+
+        {/* 2. Progress Slider Section */}
         <div className="progress-container">
             <span className="time-text left-time">{formatTime(currentTime)}</span>
             <input
@@ -36,7 +42,7 @@ const MusicPlayer = () => {
             <span className="time-text right-time">{formatTime(duration)}</span>
         </div>
 
-        {/* 2. Main Controls Section */}
+        {/* 3. Main Controls Section */}
         <div className="controls-row">
             <button className="nav-btn">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>

@@ -544,6 +544,29 @@ h1, h2, h3, p, span {
   border: 1px solid #222;
 }
 
+.player-info {
+  text-align: center;
+  width: 100%;
+}
+
+.player-album-name {
+  font-size: 1.1rem;
+  font-weight: 800;
+  margin: 0;
+  color: #fff;
+  /* Truncate if album name is too long */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.player-artist-name {
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin: 2px 0 0 0;
+  color: #b3b3b3;
+}
+
 .progress-container {
   display: flex;
   align-items: center;

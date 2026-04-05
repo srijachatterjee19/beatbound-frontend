@@ -1,35 +1,52 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef} from 'react';
 
 const MusicPlayer = () => {
   // Dummy data: 180 seconds = 3 minutes
-  const duration = 180; 
+//   const duration = 180; 
   const [currentTime, setCurrentTime] = useState(0);
   const [isPaused, setIsPaused] = useState(true);
+  const [duration, setDuration] = useState(0);
 
-
+  const audioRef = useRef(null);
 
   useEffect(() => {
-    let interval = null;
+    // initialize audio only once
+    audioRef.current = new Audio("http://localhost:5001/api/music/stream/1");
+    
+    const audio = audioRef.current;
 
-    if (!isPaused && currentTime < duration) {
-      interval = setInterval(() => {
-        setCurrentTime((prevTime) => prevTime + 1);
-      }, 1000);
-    } else {
-      clearInterval(interval);
+    // event Listeners for the Stream
+    const onLoadedMetadata = () => setDuration(audio.duration);
+    const onTimeUpdate = () => setCurrentTime(audio.currentTime);
+    const onEnded = () => setIsPaused(true);
+
+    audio.addEventListener('loadedmetadata', onLoadedMetadata);
+    audio.addEventListener('timeupdate', onTimeUpdate);
+    audio.addEventListener('ended', onEnded);
+
+    return () => {
+      audio.pause();
+      audio.removeEventListener('loadedmetadata', onLoadedMetadata);
+      audio.removeEventListener('timeupdate', onTimeUpdate);
+      audio.removeEventListener('ended', onEnded);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (audioRef.current) {
+      isPaused ? audioRef.current.pause() : audioRef.current.play();
     }
+  }, [isPaused]);
 
-    // Cleanup: This runs when the component unmounts or isPaused changes
-    return () => clearInterval(interval);
-  }, [isPaused, currentTime]);
-
-  // Move the slider manually
+  // Scrubbing the slider
   const handleSliderChange = (e) => {
-    const newTime = Number(e.target.value);
-    setCurrentTime(newTime);
+    const time = Number(e.target.value);
+    audioRef.current.currentTime = time; 
+    setCurrentTime(time);
   };
 
-  const progressPercent = (currentTime / duration) * 100;
+//   const progressPercent = (currentTime / duration) * 100;
+  const progressPercent = duration ? (currentTime / duration) * 100 : 0;
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
@@ -40,31 +57,26 @@ const MusicPlayer = () => {
     return (
         <div className="player-wrapper">
             <div className="player-pill">
-            {/* 1. Album and Artist Info (New) */}
             <div className="player-info">
-                <p className="player-album-name">Abbey Road</p>
-                <p className="player-artist-name">The Beatles</p>
+                <p className="player-album-name">Dreamy 4</p>
+                <p className="player-artist-name">YuraSoops</p>
             </div>
 
-            {/* 2. Progress Slider Section */}
             <div className="progress-container">
-                <span className="time-text left-time">{formatTime(currentTime)}</span>
+                <span className="time-text">{formatTime(currentTime)}</span>
                 <input
-                    type="range"
-                    min="0"
-                    max={duration}
-                    value={currentTime}
-                    onChange={handleSliderChange}
-                    className="progress-slider"
-                    style={{ 
-                        /* Force the percentage calculation here */
-                        '--progress': `${(currentTime / duration) * 100}%` 
-                      }}
+                type="range"
+                min="0"
+                max={duration || 0}
+                value={currentTime}
+                onChange={handleSliderChange}
+                className="progress-slider"
+                style={{ '--progress': `${progressPercent}%` }}
                 />
-                <span className="time-text right-time">{formatTime(duration)}</span>
+                <span className="time-text">{formatTime(duration)}</span>
             </div>
 
-            {/* 3. Main Controls Section */}
+            {/* main Controls section */}
             <div className="controls-row">
                 <button className="nav-btn">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>

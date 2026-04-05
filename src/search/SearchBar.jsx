@@ -28,7 +28,7 @@ const SearchBar = () => {
   const [query, setQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [activeSearchTerm, setActiveSearchTerm] = useState('');
-
+  const [isLoading, setIsLoading] = useState(false);
   const {results = [] , currentPage = 1, itemsPerPage = 12} = useSelector((state) => state.search);
 
   useEffect(() => {
@@ -52,8 +52,16 @@ const SearchBar = () => {
   const topFourHits = allMatches.slice(0, 4);
 
   const handleFinalSearch = (searchTerm) => {
-    dispatch(updateSearch(searchTerm)); 
-    setActiveSearchTerm(searchTerm);
+    const cleanTerm = searchTerm.trim();
+    if (!cleanTerm) return; // Ignore empty searches
+
+    setIsLoading(true); // Start loading
+
+    setTimeout(() => {
+      dispatch(updateSearch(searchTerm)); 
+      setActiveSearchTerm(searchTerm);
+      setIsLoading(false); // Stop loading
+    }, 1000); // Simulate a delay for loading state
   };
     
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -64,7 +72,11 @@ const SearchBar = () => {
   return (
     <div className="container">
       <header className="app-header">
-        <h1 className="title">Beatbound</h1>
+        <h1 className="title">
+          <a href="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+            Beatbound
+          </a>
+        </h1>
         <p className="subtitle">Where every beat tells a story</p>
       </header>
       <div className="search-wrapper">
@@ -76,17 +88,19 @@ const SearchBar = () => {
           onFocus={() => setIsFocused(true)}
           // The timeout gives the 'click' on a suggestion time to fire
           onBlur={() => setTimeout(() => setIsFocused(false), 500)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              handleFinalSearch(debouncedQuery); // GRID updates ONLY here
-            }
-            if (e.key === 'Escape') {
-              setIsFocused(false);
-              e.target.blur(); // Also removes the cursor from the box
-            }
-          }}
+          onKeyDown={(e) => e.key === 'Enter' && handleFinalSearch(query)}
           onChange={(e) => setQuery(e.target.value)} // ONLY updates the text/dropdown
         />
+        <button 
+          className="search-submit-btn"
+          onClick={() => handleFinalSearch(query)}
+          aria-label="Submit search"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </button>
 
         {/* Search Container: Shows Top 4 hits as the user types */}
         {isFocused && query.length > 0 && (
@@ -115,9 +129,11 @@ const SearchBar = () => {
 
                 <button 
                   className="see-all-results" 
-                  onMouseDown={() => {
-                    handleFinalSearch(debouncedQuery);
-                    setIsFocused(false);
+                  onMouseDown={() => handleFinalSearch(query)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleFinalSearch(query);
+                    }
                   }}
                 >
                   See all {allMatches.length} results
@@ -131,19 +147,40 @@ const SearchBar = () => {
       </div>
   
       <div className="results-status">
-        {activeSearchTerm ? (
+        {/* Show "Results for..." only if not loading and we have a search term */}
+        {activeSearchTerm && !isLoading ? (
           <h2 className="results-title">
-            Showing {results.length} results for "{activeSearchTerm}"
+            Showing {results.length} {results.length === 1 ? 'result' : 'results'} for "{activeSearchTerm}"
           </h2>
-        ) : (
+        ) : !activeSearchTerm && !isLoading ? (
+          /* Show "All Albums" only when there is no active search and not loading */
           <h2 className="results-title">All Albums</h2>
+        ) : (
+          /* While loading, we can leave this empty or show a "Searching..." subtitle */
+          <h2 className="results-title">&nbsp;</h2> 
         )}
       </div>
 
-      <div className="results-grid">
-        {currentItems.map((item, index) => (
-          <SearchCard key={item.id} item={item} index={index} />
-        ))}
+      <div className="results-container">
+        {isLoading ? (
+          <div className="loader-container">
+            <div className="spinner"></div>
+            <p className="loading-text">Finding your rhythm...</p>
+          </div>
+        ) : (
+          <div className="results-grid">
+            {currentItems.length > 0 ? (
+              currentItems.map((item, index) => (
+                <SearchCard key={item.id} item={item} index={index} />
+              ))
+            ) : (
+              <div className="no-results-state">
+                <p>No albums found for "{activeSearchTerm}"</p>
+                <button onClick={handleLogoClick}>Clear Search</button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {totalPages > 1 && (

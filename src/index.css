@@ -31,6 +31,9 @@ body {
 }
 
 .title {
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  user-select: none; /* Prevents highlighting the text on double-click */
   font-size: 3.5rem;
   font-weight: 900;
   margin: 0;
@@ -55,7 +58,8 @@ body {
   width: 100%;
   text-align: left; /* Aligns search bar to the left with the title */
   max-width: 100%; 
-  margin: 0 0 40px 0; /* Remove 'auto' to stop centering it */
+  margin: 0 auto;
+  /* margin: 0 0 40px 0;  */
 }
 
 .search-dropdown {
@@ -189,7 +193,8 @@ body {
   width: 100%;
   max-width: 100%;
   text-align: left;
-  padding: 12px 20px;
+  padding: 14px 50px 14px 20px; 
+  /* padding: 12px 20px; */
   border-radius: 8px;
   border: 1px solid #333;
   background: #1a1a1a;
@@ -203,6 +208,71 @@ body {
 
 .search-input:focus {
   border-color: #1db954; 
+}
+
+.search-submit-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: #b3b3b3;
+  padding: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.search-submit-btn:hover {
+  color: #1db954;
+  transform: translateY(-50%) scale(1.1);
+}
+
+.search-submit-btn:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+/*  Loading State */
+.loader-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh; 
+  width: 100%;
+  gap: 24px;
+  animation: fadeIn 0.3s ease-in;
+}
+
+.spinner {
+  width: 64px;
+  height: 64px;
+  border: 8px solid rgba(255, 255, 255, 0.1); 
+  border-radius: 50%;
+  border-top: 8px solid #1db954;
+  animation: spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  filter: drop-shadow(0 0 8px rgba(29, 185, 84, 0.3));
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.loading-text {
+  color: #1db954;
+  font-weight: 600;
+  font-size: 1.1rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  opacity: 0.8;
 }
 
 .results-grid {

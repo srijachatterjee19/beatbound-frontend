@@ -61,7 +61,7 @@ const SearchBar = () => {
       dispatch(updateSearch(searchTerm)); 
       setActiveSearchTerm(searchTerm);
       setIsLoading(false); // Stop loading
-    }, 1000); // Simulate a delay for loading state
+    }, 300); // Simulate a delay for loading state
   };
     
   const indexOfLastItem = currentPage * itemsPerPage;

@@ -625,20 +625,65 @@ h1, h2, h3, p, span {
 
 /* Slider styling to keep it clean inside the pill */
 .progress-slider {
+  -webkit-appearance: none;
+  height: 6px; 
+  border-radius: 10px;
   flex: 1;
-  height: 4px;
   appearance: none;
-  background: #333;
   border-radius: 2px;
   cursor: pointer;
+
+  /* Green (#1db954) for the progress 
+     Dark Grey (#444) for the remaining track
+  */
+  background: linear-gradient(
+    to right, 
+    #1db954 0%, 
+    #1db954 var(--progress), 
+    #444 var(--progress), 
+    #444 100%
+  );
 }
 
+/* Chrome/Safari Thumb */
 .progress-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
   appearance: none;
-  width: 10px;
-  height: 10px;
-  background: #fff;
+  width: 14px;
+  height: 14px;
+  background: #ffffff;
   border-radius: 50%;
+  border: none;
+  box-shadow: 0 0 2px rgba(0,0,0,0.5);
+  margin-top: -4px; /* Centers the thumb on the 6px track */
+}
+
+/* Firefox Track */
+.progress-slider::-moz-range-track {
+  background: #333;
+  height: 6px;
+  border-radius: 10px;
+}
+
+/* Firefox Progress */
+.progress-slider::-moz-range-progress {
+  background: #1db954;
+  height: 6px;
+  border-radius: 10px;
+}
+
+.progress-slider:hover::-webkit-slider-thumb {
+  transform: scale(1.2);
+}
+
+.progress-container:hover .progress-slider {
+  background: linear-gradient(
+    to right, 
+    #1ed760 0%, /* Brighter green on hover */
+    #1ed760 var(--progress), 
+    #555 var(--progress), /* Lighter grey on hover */
+    #555 100%
+  );
 }
 
 main, .results-grid {

@@ -7,6 +7,8 @@
   font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
   background-color: #121212;
   color: #ffffff;
+
+  --player-height: 180px;
 }
 
 body {
@@ -34,10 +36,15 @@ h1, h2, h3, p, span {
 
 /* 2. Layout Container */
 .container {
-  width: 100%;
-  max-width: 1000px; 
-  padding: 40px 20px;
+  /* width: 100%; */
+  /* max-width: 1000px;   */
+  padding: 40px 20px; 
+  max-width: 1200px;
   margin: 0 auto;
+  padding-bottom: 200px !important; 
+  display: flex;
+  display: block; 
+  min-height: 100vh;
 }
 
 /* 3. Header & Search Bar */
@@ -299,8 +306,9 @@ h1, h2, h3, p, span {
 
 .results-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 16px;
+  width: 100%;
   align-items: stretch; /* equal heights in a row */
   padding-bottom: 50px;
 }
@@ -314,6 +322,7 @@ h1, h2, h3, p, span {
   display: flex;
   align-items: center;
   justify-content: center;
+  order: 1;
   /* Ensures the music note doesn't get too big */
   position: relative; 
   /* shimmer inside the box */
@@ -352,18 +361,25 @@ h1, h2, h3, p, span {
 }
 
 .card {
+  position: relative; 
   cursor: pointer;
   min-height: 120px;
   justify-content: center;
   background-color: #181818;
   border-radius: 12px;
-  padding: 12px;
+  padding: 16px;
   border: 1px solid #282828;
   display: flex;
   flex-direction: column;
   height: 100%;
-  min-height: 220px;
   transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.card-content-wrapper {
+  order: 2; 
+  display: flex;
+  flex-direction: column;
+  text-align: left;
 }
 
 .album-title {
@@ -417,6 +433,9 @@ h1, h2, h3, p, span {
 }
 
 .genre-tag {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
   background: #333;
   padding: 4px 10px;
   border-radius: 4px;
@@ -444,8 +463,8 @@ h1, h2, h3, p, span {
   justify-content: center;
   align-items: center;
   gap: 16px;
-  margin-top: 50px;
-  padding-bottom: 60px;
+  margin-top: 40px;
+  padding-bottom: 20px;
 }
 
 .pagination-btn {
@@ -491,12 +510,12 @@ h1, h2, h3, p, span {
 
 .player-wrapper {
   position: fixed;
-  bottom: 40px;
+  /* 20px plus whatever space the phone's hardware bar needs */
+  bottom: calc(20px + env(safe-area-inset-bottom)); 
   left: 50%;
   transform: translateX(-50%);
   z-index: 9999;
 }
-
 .player-pill {
   background: #000;
   width: 420px; /* Adjusted width for the simplified look */
@@ -572,19 +591,19 @@ h1, h2, h3, p, span {
   opacity: 1;
 }
 
-/* 7. Responsive Breakpoints */
+main, .results-grid {
+  padding-bottom: 120px; 
+}
+
 @media (max-width: 768px) {
   .title {
     font-size: 1.8rem;
   }
 
   .results-grid {
-    /* On tiny phones, show 1 column */
     grid-template-columns: repeat(2, 1fr); 
-    gap: 12px; /* Tighter gap looks better on small screens */
+    gap: 12px; 
     padding: 0 10px;
-    /* max-width: 400px; */
-    /* margin: 0 auto; */
   }
 
   .container {
@@ -592,11 +611,11 @@ h1, h2, h3, p, span {
   }
 
   .card {
-    padding: 10px; /* Smaller padding to save space for the content */
+    padding: 10px; 
   }
 
   .album-title {
-    font-size: 0.85rem; /* Shrink text so it doesn't wrap awkwardly */
+    font-size: 0.85rem; 
   }
 
   .artist-name {
@@ -604,21 +623,68 @@ h1, h2, h3, p, span {
   }
 }
 
-/* On very small phones, switch to a single column layout and adjust spacing */
 @media (max-width: 700px) {
   .results-grid {
-    grid-template-columns: 1fr; /* Forces single card */
-    gap: 20px;
-    padding: 0 10px;
+    grid-template-columns: 1fr !important; 
+    gap: 10px; 
+    padding: 0 15px;
   }
 
-  .search-wrapper {
-    margin-bottom: 25px; /* Tighter spacing for mobile */
+  .card {
+    display: flex;
+    flex-direction: row; 
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: #121212;
+    border-radius: 8px;
+    height: auto; /* Let the height be determined by content */
+  }
+
+  .card-content-wrapper {
+    order: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    flex: 1;
+    overflow: hidden;
   }
 
   .album-title {
-    font-size: 1.1rem; /* Make text bigger since there is more room now */
-    white-space: normal; /* Let the title wrap if it's long */
+    font-size: 1.1rem;
+    margin: 0 0 2px 0;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
-  
+
+  .card-subtitle-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .artist-name {
+    font-size: 0.85rem;
+    color: #b3b3b3;
+  }
+
+  .genre-tag {
+    font-size: 0.65rem;
+    background: #282828;
+    color: #1db954;
+    padding: 2px 6px;
+    border-radius: 3px;
+    text-transform: uppercase;
+  }
+
+  .album-placeholder {
+    width: 50px;
+    height: 50px;
+    margin-bottom: 0;
+    flex-shrink: 0;
+    order: 2; /* Ensures it stays on the far right */
+  }
 }

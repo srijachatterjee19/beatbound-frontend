@@ -5,14 +5,19 @@ import { MUSIC_DATA } from '../data/mockData';
 
 const SearchCard = memo(({ item, index }) => {
   return (
-    <div className="card card-animate" style={{ animationDelay: `${index * 0.05}s` }}>
+    <div 
+      className="card card-animate" 
+      onClick={() => dispatch(setTrack(item))}
+    >
       <div className="album-placeholder">
         <span className="placeholder-icon">♪</span>
       </div>
-      <h2 className="album-title">{item.album}</h2>
-      <div className="meta-info">
-        <span className="artist-name">{item.name}</span>
-        <span className="genre-tag">{item.genre}</span>
+      <div className="card-content-wrapper">
+        <h2 className="album-title">{item.album}</h2>
+        <div className="card-subtitle-row">
+          <span className="artist-name">{item.name}</span>
+          <span className="genre-tag">{item.genre}</span>
+        </div>
       </div>
     </div>
   );

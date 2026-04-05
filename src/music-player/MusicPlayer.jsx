@@ -1,50 +1,60 @@
-import React, { useRef, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { togglePlay } from '../music-player/playerSlice';
-import { Play, Pause, SkipBack, SkipForward } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 
 const MusicPlayer = () => {
-  const dispatch = useDispatch();
-  const audioRef = useRef(null);
-  const { currentTrack, isPlaying } = useSelector((state) => state.player || {});
+  // Dummy data: 180 seconds = 3 minutes
+  const duration = 180; 
+  const [currentTime, setCurrentTime] = useState(0);
+  const [isPaused, setIsPaused] = useState(true);
 
-  useEffect(() => {
-    if (!audioRef.current) return;
-    isPlaying ? audioRef.current.play().catch(() => {}) : audioRef.current.pause();
-  }, [isPlaying, currentTrack]);
+  // Formatting seconds into MM:SS
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  };
+
+  // Move the slider manually
+  const handleSliderChange = (e) => {
+    const newTime = Number(e.target.value);
+    setCurrentTime(newTime);
+  };
 
   return (
     <div className="player-wrapper">
-      <div className="player-pill">
-        {/* 1. Top Progress Bar */}
-        <div className="slider-container">
-          <div className="slider-track">
-            {/* We'll keep this static for now as requested */}
-            <div className="slider-fill" style={{ width: '60%' }}></div>
-            <div className="slider-thumb" style={{ left: '60%' }}></div>
-          </div>
+  <div className="player-pill">
+    {/* 1. Progress Slider Section */}
+        <div className="progress-container">
+            <span className="time-text left-time">{formatTime(currentTime)}</span>
+            <input
+                type="range"
+                min="0"
+                max={duration}
+                value={currentTime}
+                onChange={handleSliderChange}
+                className="progress-slider"
+            />
+            <span className="time-text right-time">{formatTime(duration)}</span>
         </div>
 
-        {/* 2. Centered Controls Only */}
-        <div className="control-row-centered">
-          <SkipBack size={28} fill="currentColor" className="cursor-pointer" />
-          
-          <button className="play-circle" onClick={() => dispatch(togglePlay())}>
-            {isPlaying ? (
-              <Pause size={24} fill="black" />
-            ) : (
-              <Play size={24} fill="black" style={{ marginLeft: '4px' }} />
-            )}
-          </button>
-          
-          <SkipForward size={28} fill="currentColor" className="cursor-pointer" />
-        </div>
-      </div>
+        {/* 2. Main Controls Section */}
+        <div className="controls-row">
+            <button className="nav-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+            </button>
+        
+            <button className="play-pause-btn" onClick={() => setIsPaused(!isPaused)}>
+                {isPaused ? (
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="black"><path d="M8 5v14l11-7z"/></svg>
+                ) : (
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="black"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                )}
+            </button>
 
-      <audio 
-        ref={audioRef} 
-        src={currentTrack ? `http://localhost:5000/api/stream/${currentTrack.id}` : ""} 
-      />
+            <button className="nav-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+            </button>
+        </div>
+    </div>
     </div>
   );
 };

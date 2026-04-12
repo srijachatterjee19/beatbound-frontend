@@ -38,17 +38,44 @@ const MusicPlayer = () => {
     };
   }, []);
 
+
   useEffect(() => {
-    
-    if (!currentTrack || !audioRef.current) return;
+    if (!currentTrack) return;
 
     const audio = audioRef.current;
 
-    audio.src = `http://localhost:5001/api/music/stream/${currentTrack.id}`;
-    audio.currentTime = 0;
-    audio.play();
-  }, [currentTrack]);
+    const playSong = async () => {
+      try {
+        audio.pause(); // stop previous
+        audio.currentTime = 0;
 
+        const res = await fetch(
+          `http://localhost:5001/api/music/stream/${currentTrack.id}`
+        );
+
+        const contentType = res.headers.get("content-type");
+
+        if (contentType?.includes("application/json")) {
+          const data = await res.json();
+          audio.src = data.url;
+        } else {
+          audio.src = `http://localhost:5001/api/music/stream/${currentTrack.id}`;
+        }
+
+        await audio.play();
+
+      } catch (err) {
+        console.error("Playback error:", err);
+      }
+    };
+
+    playSong();
+
+    return () => {
+      audio.pause(); 
+    };
+
+  }, [currentTrack]);
 
   useEffect(() => {
     if (!audioRef.current) return;

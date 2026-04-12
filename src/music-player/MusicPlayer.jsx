@@ -45,8 +45,6 @@ const MusicPlayer = () => {
     const audio = audioRef.current;
 
     audio.src = `http://localhost:5001/api/music/stream/${currentTrack.id}`;
-    // audio.load();
-    // audio.play();
     audio.currentTime = 0;
     audio.play();
   }, [currentTrack]);

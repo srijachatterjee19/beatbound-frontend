@@ -1,6 +1,8 @@
 import React, { useState, useEffect,memo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateSearch, setPage, setData,resetSearch } from './searchSlice';
+import { setTrack,togglePlay } from '../music-player/playerSlice';
+import { fuzzyMatch } from '../utils/fuzzySearch';
 
 const SearchCard = memo(({ item }) => {
   const dispatch = useDispatch();
@@ -19,6 +21,9 @@ const SearchCard = memo(({ item }) => {
           <span className="artist-name">{item.title}</span>
           <span className="genre-tag">{item.genre}</span>
         </div>
+        {/* <button onClick={togglePlay}>
+          ▶
+        </button> */}
       </div>
     </div>
   );
@@ -39,8 +44,8 @@ const SearchBar = () => {
     dispatch(resetSearch());
   };
 
-  const {results = [], currentPage = 1, itemsPerPage = 12} =
-    useSelector((state) => state.search);
+  const { data = [], results = [], currentPage = 1, itemsPerPage = 12 } =
+  useSelector((state) => state.search);
 
   useEffect(() => {
     const fetchSongs = async () => {
@@ -65,14 +70,18 @@ const SearchBar = () => {
   }, [query]);
 
   const allMatches = debouncedQuery.length > 0 
-    ? results.filter(item =>
-        item.title?.toLowerCase().includes(debouncedQuery.toLowerCase()) ||
-        item.artist?.toLowerCase().includes(debouncedQuery.toLowerCase()) ||
-        item.album?.toLowerCase().includes(debouncedQuery.toLowerCase()) ||
-        item.genre?.toLowerCase().includes(debouncedQuery.toLowerCase()) ||
-        item.tags?.some(tag => tag.toLowerCase().includes(debouncedQuery.toLowerCase()))
-      )
-    : [];
+  ? data.filter(item => {
+      const q = debouncedQuery.toLowerCase();
+
+      return (
+        fuzzyMatch(item.title?.toLowerCase() || "", q) ||
+        fuzzyMatch(item.artist?.toLowerCase() || "", q) ||
+        fuzzyMatch(item.album?.toLowerCase() || "", q) ||
+        fuzzyMatch(item.genre?.toLowerCase() || "", q) ||
+        item.tags?.some(tag => fuzzyMatch(tag.toLowerCase(), q))
+      );
+    })
+  : [];
 
   const topFourHits = allMatches.slice(0, 4);
 
@@ -137,7 +146,7 @@ const SearchBar = () => {
                       key={hit.id} 
                       className="mini-result-item" 
                       onMouseDown={() => {
-                        setQuery(hit.title);
+                        // setQuery(hit.title);
                         handleFinalSearch(hit.title);
                         setIsFocused(false);
                       }}
@@ -174,7 +183,7 @@ const SearchBar = () => {
         {/* Show "Results for..." only if not loading and we have a search term */}
         {activeSearchTerm && !isLoading ? (
           <h2 className="results-title">
-            Showing {results.length} results for "{activeSearchTerm}"
+            Showing {results.length} results for "{query}"
           </h2>
         ) : !activeSearchTerm && !isLoading ? (
           /* Show "All Albums" only when there is no active search and not loading */

@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { fuzzyMatch } from '../utils/fuzzySearch';
 
 const searchSlice = createSlice({
   name: 'search',
@@ -18,12 +19,19 @@ const searchSlice = createSlice({
     updateSearch: (state, action) => {
       const term = action.payload.toLowerCase();
 
-      state.results = state.data.filter(item =>
-        item.title?.toLowerCase().includes(term) ||
-        item.artist?.toLowerCase().includes(term) ||
-        item.album?.toLowerCase().includes(term) ||
-        item.genre?.toLowerCase().includes(term)
-      );
+      state.term = term;
+
+      state.results = state.data.filter(item => {
+        const q = term;
+      
+        return (
+          fuzzyMatch(item.title?.toLowerCase() || "", q) ||
+          fuzzyMatch(item.artist?.toLowerCase() || "", q) ||
+          fuzzyMatch(item.album?.toLowerCase() || "", q) ||
+          fuzzyMatch(item.genre?.toLowerCase() || "", q) ||
+          item.tags?.some(tag => fuzzyMatch(tag.toLowerCase(), q))
+        );
+      });
 
       state.currentPage = 1; 
     },
@@ -33,7 +41,7 @@ const searchSlice = createSlice({
 
     resetSearch: (state) => {
       state.term = '';
-      state.results = [];
+      state.results = state.data;
       state.currentPage = 1;
     }
   },

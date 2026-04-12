@@ -4,26 +4,59 @@ import { updateSearch, setPage, setData,resetSearch } from './searchSlice';
 import { setTrack,togglePlay } from '../music-player/playerSlice';
 import { fuzzyMatch } from '../utils/fuzzySearch';
 
-const SearchCard = memo(({ item }) => {
+
+const SearchCard = memo(({ item, isPlaying, isCurrent }) => {
   const dispatch = useDispatch();
 
+  const isPlayable = item?.fileThere;
+
+  const handleCardClick = () => {
+    if (!isPlayable) return;
+    dispatch(setTrack(item));
+  };
+
+  const handlePlayPause = (e) => {
+    e.stopPropagation();
+
+    if (!isPlayable) return;
+
+    if (isCurrent) {
+      dispatch(togglePlay());
+    } else {
+      dispatch(setTrack(item));
+    }
+  };
+
   return (
-    <div 
-      className="card card-animate" 
-      onClick={() => dispatch(setTrack(item))}
-    >
+    <div className={`card card-animate ${!isPlayable ? 'disabled' : ''}  `} onClick={handleCardClick}>
+      
       <div className="album-placeholder">
-        <span className="placeholder-icon">♪</span>
+
+        {isPlayable && (
+          <div className="overlay">
+            <button className="play-btn" onClick={handlePlayPause}>
+              {isCurrent && isPlaying ? (
+                // ⏸
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="black">
+                  <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                </svg>
+              ) : (
+                // ▶
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="black">
+                  <path d="M8 5v14l11-7z"/>
+                </svg>
+              )}
+            </button>
+          </div>
+        )}
       </div>
+
       <div className="card-content-wrapper">
         <h2 className="album-title">{item.album}</h2>
         <div className="card-subtitle-row">
           <span className="artist-name">{item.title}</span>
           <span className="genre-tag">{item.genre}</span>
         </div>
-        {/* <button onClick={togglePlay}>
-          ▶
-        </button> */}
       </div>
     </div>
   );
@@ -46,6 +79,8 @@ const SearchBar = () => {
 
   const { data = [], results = [], currentPage = 1, itemsPerPage = 12 } =
   useSelector((state) => state.search);
+  
+  const { currentTrack, isPlaying } = useSelector(state => state.player);
 
   useEffect(() => {
     const fetchSongs = async () => {
@@ -204,7 +239,12 @@ const SearchBar = () => {
           <div className="results-grid">
             {currentItems.length > 0 ? (
               currentItems.map((item, index) => (
-                <SearchCard key={item.id} item={item} index={index} />
+              <SearchCard
+                  key={item.id}
+                  item={item}
+                  isPlaying={isPlaying}
+                  isCurrent={currentTrack?.id === item.id}
+                />
               ))
             ) : (
               <div className="no-results-state">

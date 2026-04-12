@@ -315,6 +315,7 @@ h1, h2, h3, p, span {
 }
 
 .album-placeholder {
+  position: relative;
   width: 100%;
   aspect-ratio: 1 / 1; /* Forces the height to always match the width */
   background-color: #282828;
@@ -328,6 +329,42 @@ h1, h2, h3, p, span {
   position: relative; 
   /* shimmer inside the box */
   overflow: hidden;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+/* Show on hover */
+.card:hover .overlay {
+  opacity: 1;
+}
+
+/* Button styling */
+.play-btn {
+  background: white;
+  border: none;
+  border-radius: 50%;
+  padding: 10px;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Smooth hover scale */
+.play-btn:hover {
+  transform: scale(1.1);
 }
 
 .placeholder-icon {

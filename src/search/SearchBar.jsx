@@ -1,9 +1,10 @@
 import React, { useState, useEffect,memo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { updateSearch, setPage } from './searchSlice';
-import { MUSIC_DATA } from '../data/mockData';
+import { updateSearch, setPage, setData,resetSearch } from './searchSlice';
 
-const SearchCard = memo(({ item, index }) => {
+const SearchCard = memo(({ item }) => {
+  const dispatch = useDispatch();
+
   return (
     <div 
       className="card card-animate" 
@@ -15,7 +16,7 @@ const SearchCard = memo(({ item, index }) => {
       <div className="card-content-wrapper">
         <h2 className="album-title">{item.album}</h2>
         <div className="card-subtitle-row">
-          <span className="artist-name">{item.name}</span>
+          <span className="artist-name">{item.title}</span>
           <span className="genre-tag">{item.genre}</span>
         </div>
       </div>
@@ -26,7 +27,6 @@ const SearchCard = memo(({ item, index }) => {
 // Set display name for better debugging in Profiler
 SearchCard.displayName = 'SearchCard';
 
-
 const SearchBar = () => {
   const dispatch = useDispatch();
   const [isFocused, setIsFocused] = useState(false);
@@ -34,7 +34,28 @@ const SearchBar = () => {
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [activeSearchTerm, setActiveSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const {results = [] , currentPage = 1, itemsPerPage = 12} = useSelector((state) => state.search);
+
+  const handleLogoClick = () => {
+    dispatch(resetSearch());
+  };
+
+  const {results = [], currentPage = 1, itemsPerPage = 12} =
+    useSelector((state) => state.search);
+
+  useEffect(() => {
+    const fetchSongs = async () => {
+      try {
+        const res = await fetch('http://localhost:5001/api/music/songs');
+        const json = await res.json();
+
+        dispatch(setData(json.data)); 
+      } catch (err) {
+        console.error('Error fetching songs:', err);
+      }
+    };
+
+    fetchSongs();
+  }, [dispatch]);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -43,37 +64,36 @@ const SearchBar = () => {
     return () => clearTimeout(handler);
   }, [query]);
 
-  // Unified filtering logic: Get ALL matches for the "See all" count
   const allMatches = debouncedQuery.length > 0 
-    ? MUSIC_DATA.filter(item => 
-        item.album?.toLowerCase().includes(debouncedQuery.toLowerCase()) || 
-        item.name?.toLowerCase().includes(debouncedQuery.toLowerCase()) ||
+    ? results.filter(item =>
+        item.title?.toLowerCase().includes(debouncedQuery.toLowerCase()) ||
+        item.artist?.toLowerCase().includes(debouncedQuery.toLowerCase()) ||
+        item.album?.toLowerCase().includes(debouncedQuery.toLowerCase()) ||
         item.genre?.toLowerCase().includes(debouncedQuery.toLowerCase()) ||
-        item.songs?.some(song => song.toLowerCase().includes(debouncedQuery.toLowerCase()))
+        item.tags?.some(tag => tag.toLowerCase().includes(debouncedQuery.toLowerCase()))
       )
     : [];
 
-  // Slice exactly the top 4 for the search container display
   const topFourHits = allMatches.slice(0, 4);
 
   const handleFinalSearch = (searchTerm) => {
     const cleanTerm = searchTerm.trim();
-    if (!cleanTerm) return; // Ignore empty searches
+    if (!cleanTerm) return;
 
-    setIsLoading(true); // Start loading
+    setIsLoading(true);
 
     setTimeout(() => {
       dispatch(updateSearch(searchTerm)); 
       setActiveSearchTerm(searchTerm);
-      setIsLoading(false); // Stop loading
-    }, 1000); // Simulate a delay for loading state
+      setIsLoading(false);
+    }, 500);
   };
-    
+
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = results.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(results.length / itemsPerPage);
-  
+
   return (
     <div className="container">
       <header className="app-header">
@@ -91,10 +111,9 @@ const SearchBar = () => {
           placeholder="Search artists, albums, or songs..."
           value={query}
           onFocus={() => setIsFocused(true)}
-          // The timeout gives the 'click' on a suggestion time to fire
           onBlur={() => setTimeout(() => setIsFocused(false), 500)}
           onKeyDown={(e) => e.key === 'Enter' && handleFinalSearch(query)}
-          onChange={(e) => setQuery(e.target.value)} // ONLY updates the text/dropdown
+          onChange={(e) => setQuery(e.target.value)}
         />
         <button 
           className="search-submit-btn"
@@ -118,15 +137,15 @@ const SearchBar = () => {
                       key={hit.id} 
                       className="mini-result-item" 
                       onMouseDown={() => {
-                        setQuery(hit.album);
-                        handleFinalSearch(hit.album);
+                        setQuery(hit.title);
+                        handleFinalSearch(hit.title);
                         setIsFocused(false);
                       }}
                     >
                       <div className="mini-art">♪</div>
                       <div className="mini-text">
-                        <span className="mini-title">{hit.album}</span>
-                        <span className="mini-subtitle">{hit.name}</span>
+                        <span className="mini-title">{hit.title}</span>
+                        <span className="mini-subtitle">{hit.artist}</span>
                       </div>
                     </div>
                   ))}
@@ -155,7 +174,7 @@ const SearchBar = () => {
         {/* Show "Results for..." only if not loading and we have a search term */}
         {activeSearchTerm && !isLoading ? (
           <h2 className="results-title">
-            Showing {results.length} {results.length === 1 ? 'result' : 'results'} for "{activeSearchTerm}"
+            Showing {results.length} results for "{activeSearchTerm}"
           </h2>
         ) : !activeSearchTerm && !isLoading ? (
           /* Show "All Albums" only when there is no active search and not loading */

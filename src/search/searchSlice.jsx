@@ -1,34 +1,51 @@
-// src/search/searchSlice.js
 import { createSlice } from '@reduxjs/toolkit';
-import { MUSIC_DATA } from '../data/mockData'; 
+import { fuzzyMatch } from '../utils/fuzzySearch';
 
 const searchSlice = createSlice({
   name: 'search',
   initialState: {
     term: '',
-    data: [], // This will hold the full dataset, but we can also just use MUSIC_DATA directly in the reducer
-    results: MUSIC_DATA,
+    data: [],
+    results: [],
     currentPage: 1,
-    itemsPerPage: 12, 
+    itemsPerPage: 12,
   },
   reducers: {
+    setData: (state, action) => {
+      state.data = action.payload;
+      state.results = action.payload;
+    },
+
     updateSearch: (state, action) => {
       const term = action.payload.toLowerCase();
-      state.results = MUSIC_DATA.filter((item) => {
+
+      state.term = term;
+
+      state.results = state.data.filter(item => {
+        const q = term;
+      
         return (
-          item.name.toLowerCase().includes(term) ||
-          item.album.toLowerCase().includes(term) ||
-          item.genre.toLowerCase().includes(term) ||
-          item.songs.some(song => song.toLowerCase().includes(term))
+          fuzzyMatch(item.title?.toLowerCase() || "", q) ||
+          fuzzyMatch(item.artist?.toLowerCase() || "", q) ||
+          fuzzyMatch(item.album?.toLowerCase() || "", q) ||
+          fuzzyMatch(item.genre?.toLowerCase() || "", q) ||
+          item.tags?.some(tag => fuzzyMatch(tag.toLowerCase(), q))
         );
       });
+
       state.currentPage = 1; 
     },
     setPage: (state, action) => {
-      state.currentPage = action.payload;  // updates the global page number
+      state.currentPage = action.payload;
+    },
+
+    resetSearch: (state) => {
+      state.term = '';
+      state.results = state.data;
+      state.currentPage = 1;
     }
   },
 });
 
-export const { updateSearch, setPage } = searchSlice.actions;
+export const { setData, updateSearch, setPage,resetSearch } = searchSlice.actions;
 export default searchSlice.reducer; 

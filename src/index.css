@@ -7,6 +7,8 @@
   font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
   background-color: #121212;
   color: #ffffff;
+
+  --player-height: 180px;
 }
 
 body {
@@ -16,12 +18,33 @@ body {
   flex-direction: column;
 }
 
+h1, h2, h3, p, span {
+  user-select: none;
+}
+
+.player-pill, 
+.slider-container, 
+.slider-track, 
+.slider-thumb {
+  /* Stops the I-beam from appearing */
+  user-select: none;
+  -webkit-user-select: none;
+  
+  /* Forces the pointer hand */
+  cursor: pointer !important;
+}
+
 /* 2. Layout Container */
 .container {
-  width: 100%;
-  max-width: 1000px; 
-  padding: 40px 20px;
+  /* width: 100%; */
+  /* max-width: 1000px;   */
+  padding: 40px 20px; 
+  max-width: 1200px;
   margin: 0 auto;
+  padding-bottom: 200px !important; 
+  display: flex;
+  display: block; 
+  min-height: 100vh;
 }
 
 /* 3. Header & Search Bar */
@@ -78,6 +101,7 @@ body {
   z-index: 1000; /* Floats over the grid */
   box-shadow: 0 8px 16px rgba(0,0,0,0.4);
 }
+
 
 .dropdown-item {
   display: flex;
@@ -190,6 +214,12 @@ body {
 }
 
 .search-input {
+  /* Hides the blinking cursor line */
+  caret-color: transparent;
+  /* Standard UI polish */
+  outline: none;
+  user-select: text;
+
   width: 100%;
   max-width: 100%;
   text-align: left;
@@ -277,13 +307,15 @@ body {
 
 .results-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 16px;
+  width: 100%;
   align-items: stretch; /* equal heights in a row */
   padding-bottom: 50px;
 }
 
 .album-placeholder {
+  position: relative;
   width: 100%;
   aspect-ratio: 1 / 1; /* Forces the height to always match the width */
   background-color: #282828;
@@ -292,10 +324,47 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  order: 1;
   /* Ensures the music note doesn't get too big */
   position: relative; 
   /* shimmer inside the box */
   overflow: hidden;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+/* Show on hover */
+.card:hover .overlay {
+  opacity: 1;
+}
+
+/* Button styling */
+.play-btn {
+  background: white;
+  border: none;
+  border-radius: 50%;
+  padding: 10px;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Smooth hover scale */
+.play-btn:hover {
+  transform: scale(1.1);
 }
 
 .placeholder-icon {
@@ -330,31 +399,49 @@ body {
 }
 
 .card {
+  position: relative; 
+  cursor: pointer;
   min-height: 120px;
   justify-content: center;
   background-color: #181818;
   border-radius: 12px;
-  padding: 12px;
+  padding: 16px;
   border: 1px solid #282828;
   display: flex;
   flex-direction: column;
   height: 100%;
-  min-height: 220px;
   transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.card-content-wrapper {
+  order: 2; 
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.card-subtitle-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
 }
 
 .album-title {
   font-size: 0.95rem;
-  margin: 0 0 4px 0;
   /* Truncate text if the album name is too long */
+  margin-bottom: 16px; 
+  line-height: 1.2;
+
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .artist-name {
-  font-size: 0.8rem;
-  margin-top: auto; /* Pushes the artist name to the bottom if there is extra space */
+  font-size: 0.9rem;
+  color: #a7a7a7;
+  margin-right: 10px; 
 }
 
 @keyframes fadeInUp {
@@ -394,13 +481,18 @@ body {
 }
 
 .genre-tag {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
   background: #333;
-  padding: 4px 10px;
+  padding: 4px 4px;
+  margin-top: 4px;
   border-radius: 4px;
   font-size: 0.75rem;
   color: #1db954;
   text-transform: uppercase;
   font-weight: bold;
+  line-height: 1;
 }
 
 /* 6. Song List */
@@ -421,8 +513,8 @@ body {
   justify-content: center;
   align-items: center;
   gap: 16px;
-  margin-top: 50px;
-  padding-bottom: 60px;
+  margin-top: 40px;
+  padding-bottom: 20px;
 }
 
 .pagination-btn {
@@ -465,20 +557,185 @@ body {
   padding: 8px 16px;
   border-radius: 20px;
 }
+.player-wrapper {
+  position: fixed;
+  bottom: 30px; /* Adjust this to push it further down/up */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  width: 100%;
+  max-width: 450px;
+  padding: 0 20px;
+}
 
-/* 7. Responsive Breakpoints */
+.player-pill {
+  background: #000;
+  border-radius: 40px; /* This creates the 'Pill' shape */
+  align-items: center; /* Centers the whole stack */
+  width: 450px;       /* Or whatever width you prefer */
+  padding: 20px 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  border: 1px solid #222;
+}
+
+.player-info {
+  text-align: center;
+  width: 100%;
+}
+
+.player-album-name {
+  font-size: 1.1rem;
+  font-weight: 800;
+  margin: 0;
+  color: #fff;
+  /* Truncate if album name is too long */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.player-artist-name {
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin: 2px 0 0 0;
+  color: #b3b3b3;
+}
+
+.progress-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;        
+  gap: 15px;         
+  margin-bottom: 10px;
+}
+
+.time-text {
+  font-size: 12px;
+  color: #b3b3b3;
+  min-width: 35px; 
+  font-family: 'Monaco', monospace; /* Monospace stops text jitter */
+}
+
+.left-time { text-align: left; }
+.right-time { text-align: right; }
+
+/* Row for the Back, Play, Forward buttons */
+.controls-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+}
+
+.play-pause-btn {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: #fff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.play-pause-btn:hover {
+  transform: scale(1.1);
+}
+
+.nav-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  opacity: 0.8;
+}
+
+.nav-btn:hover {
+  opacity: 1;
+}
+
+/* Slider styling to keep it clean inside the pill */
+.progress-slider {
+  -webkit-appearance: none;
+  height: 6px; 
+  border-radius: 10px;
+  flex: 1;
+  appearance: none;
+  border-radius: 2px;
+  cursor: pointer;
+
+  /* Green (#1db954) for the progress 
+     Dark Grey (#444) for the remaining track
+  */
+  background: linear-gradient(
+    to right, 
+    #1db954 0%, 
+    #1db954 var(--progress), 
+    #444 var(--progress), 
+    #444 100%
+  );
+}
+
+/* Chrome/Safari Thumb */
+.progress-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  background: #ffffff;
+  border-radius: 50%;
+  border: none;
+  box-shadow: 0 0 2px rgba(0,0,0,0.5);
+  margin-top: -4px; /* Centers the thumb on the 6px track */
+}
+
+/* Firefox Track */
+.progress-slider::-moz-range-track {
+  background: #333;
+  height: 6px;
+  border-radius: 10px;
+}
+
+/* Firefox Progress */
+.progress-slider::-moz-range-progress {
+  background: #1db954;
+  height: 6px;
+  border-radius: 10px;
+}
+
+.progress-slider:hover::-webkit-slider-thumb {
+  transform: scale(1.2);
+}
+
+.progress-container:hover .progress-slider {
+  background: linear-gradient(
+    to right, 
+    #1ed760 0%, /* Brighter green on hover */
+    #1ed760 var(--progress), 
+    #555 var(--progress), /* Lighter grey on hover */
+    #555 100%
+  );
+}
+
+main, .results-grid {
+  padding-bottom: 120px; 
+}
+
 @media (max-width: 768px) {
   .title {
     font-size: 1.8rem;
   }
 
   .results-grid {
-    /* On tiny phones, show 1 column */
     grid-template-columns: repeat(2, 1fr); 
-    gap: 12px; /* Tighter gap looks better on small screens */
+    gap: 12px; 
     padding: 0 10px;
-    /* max-width: 400px; */
-    /* margin: 0 auto; */
   }
 
   .container {
@@ -486,11 +743,11 @@ body {
   }
 
   .card {
-    padding: 10px; /* Smaller padding to save space for the content */
+    padding: 10px; 
   }
 
   .album-title {
-    font-size: 0.85rem; /* Shrink text so it doesn't wrap awkwardly */
+    font-size: 0.85rem; 
   }
 
   .artist-name {
@@ -498,20 +755,69 @@ body {
   }
 }
 
-/* On very small phones, switch to a single column layout and adjust spacing */
 @media (max-width: 700px) {
   .results-grid {
-    grid-template-columns: 1fr; /* Forces single card */
-    gap: 20px;
-    padding: 0 10px;
+    grid-template-columns: 1fr !important; 
+    gap: 10px; 
+    padding: 0 15px;
   }
 
-  .search-wrapper {
-    margin-bottom: 25px; /* Tighter spacing for mobile */
+  .card {
+    display: flex;
+    flex-direction: row; 
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: #121212;
+    border-radius: 8px;
+    height: auto; /* Let the height be determined by content */
+  }
+
+  .card-content-wrapper {
+    order: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    flex: 1;
+    overflow: hidden;
+    gap: 8px;
   }
 
   .album-title {
-    font-size: 1.1rem; /* Make text bigger since there is more room now */
-    white-space: normal; /* Let the title wrap if it's long */
+    font-size: 1.1rem;
+    margin: 0 0 2px 0;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .card-subtitle-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .artist-name {
+    font-size: 0.85rem;
+    color: #b3b3b3;
+  }
+
+  .genre-tag {
+    font-size: 0.65rem;
+    background: #282828;
+    color: #1db954;
+    padding: 2px 6px;
+    border-radius: 3px;
+    text-transform: uppercase;
+  }
+
+  .album-placeholder {
+    width: 50px;
+    height: 50px;
+    margin-bottom: 0;
+    flex-shrink: 0;
+    order: 2; /* Ensures it stays on the far right */
   }
 }

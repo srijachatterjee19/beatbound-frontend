@@ -1,18 +1,62 @@
 import React, { useState, useEffect,memo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { updateSearch, setPage } from './searchSlice';
-import { MUSIC_DATA } from '../data/mockData';
+import { updateSearch, setPage, setData,resetSearch } from './searchSlice';
+import { setTrack,togglePlay } from '../music-player/playerSlice';
+import { fuzzyMatch } from '../utils/fuzzySearch';
 
-const SearchCard = memo(({ item, index }) => {
+
+const SearchCard = memo(({ item, isPlaying, isCurrent }) => {
+  const dispatch = useDispatch();
+
+  const isPlayable = item?.fileThere;
+
+  const handleCardClick = () => {
+    if (!isPlayable) return;
+    dispatch(setTrack(item));
+  };
+
+  const handlePlayPause = (e) => {
+    e.stopPropagation();
+
+    if (!isPlayable) return;
+
+    if (isCurrent) {
+      dispatch(togglePlay());
+    } else {
+      dispatch(setTrack(item));
+    }
+  };
+
   return (
-    <div className="card card-animate" style={{ animationDelay: `${index * 0.05}s` }}>
+    <div className={`card card-animate ${!isPlayable ? 'disabled' : ''}  `} onClick={handleCardClick}>
+      
       <div className="album-placeholder">
-        <span className="placeholder-icon">♪</span>
+
+        {isPlayable && (
+          <div className="overlay">
+            <button className="play-btn" onClick={handlePlayPause}>
+              {isCurrent && isPlaying ? (
+                // ⏸
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="black">
+                  <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                </svg>
+              ) : (
+                // ▶
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="black">
+                  <path d="M8 5v14l11-7z"/>
+                </svg>
+              )}
+            </button>
+          </div>
+        )}
       </div>
-      <h2 className="album-title">{item.album}</h2>
-      <div className="meta-info">
-        <span className="artist-name">{item.name}</span>
-        <span className="genre-tag">{item.genre}</span>
+
+      <div className="card-content-wrapper">
+        <h2 className="album-title">{item.album}</h2>
+        <div className="card-subtitle-row">
+          <span className="artist-name">{item.title}</span>
+          <span className="genre-tag">{item.genre}</span>
+        </div>
       </div>
     </div>
   );
@@ -21,7 +65,6 @@ const SearchCard = memo(({ item, index }) => {
 // Set display name for better debugging in Profiler
 SearchCard.displayName = 'SearchCard';
 
-
 const SearchBar = () => {
   const dispatch = useDispatch();
   const [isFocused, setIsFocused] = useState(false);
@@ -29,7 +72,30 @@ const SearchBar = () => {
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [activeSearchTerm, setActiveSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const {results = [] , currentPage = 1, itemsPerPage = 12} = useSelector((state) => state.search);
+
+  const handleLogoClick = () => {
+    dispatch(resetSearch());
+  };
+
+  const { data = [], results = [], currentPage = 1, itemsPerPage = 12 } =
+  useSelector((state) => state.search);
+  
+  const { currentTrack, isPlaying } = useSelector(state => state.player);
+
+  useEffect(() => {
+    const fetchSongs = async () => {
+      try {
+        const res = await fetch('http://localhost:5001/api/music/songs');
+        const json = await res.json();
+
+        dispatch(setData(json.data)); 
+      } catch (err) {
+        console.error('Error fetching songs:', err);
+      }
+    };
+
+    fetchSongs();
+  }, [dispatch]);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -38,37 +104,40 @@ const SearchBar = () => {
     return () => clearTimeout(handler);
   }, [query]);
 
-  // Unified filtering logic: Get ALL matches for the "See all" count
   const allMatches = debouncedQuery.length > 0 
-    ? MUSIC_DATA.filter(item => 
-        item.album?.toLowerCase().includes(debouncedQuery.toLowerCase()) || 
-        item.name?.toLowerCase().includes(debouncedQuery.toLowerCase()) ||
-        item.genre?.toLowerCase().includes(debouncedQuery.toLowerCase()) ||
-        item.songs?.some(song => song.toLowerCase().includes(debouncedQuery.toLowerCase()))
-      )
-    : [];
+  ? data.filter(item => {
+      const q = debouncedQuery.toLowerCase();
 
-  // Slice exactly the top 4 for the search container display
+      return (
+        fuzzyMatch(item.title?.toLowerCase() || "", q) ||
+        fuzzyMatch(item.artist?.toLowerCase() || "", q) ||
+        fuzzyMatch(item.album?.toLowerCase() || "", q) ||
+        fuzzyMatch(item.genre?.toLowerCase() || "", q) ||
+        item.tags?.some(tag => fuzzyMatch(tag.toLowerCase(), q))
+      );
+    })
+  : [];
+
   const topFourHits = allMatches.slice(0, 4);
 
   const handleFinalSearch = (searchTerm) => {
     const cleanTerm = searchTerm.trim();
-    if (!cleanTerm) return; // Ignore empty searches
+    if (!cleanTerm) return;
 
-    setIsLoading(true); // Start loading
+    setIsLoading(true);
 
     setTimeout(() => {
       dispatch(updateSearch(searchTerm)); 
       setActiveSearchTerm(searchTerm);
-      setIsLoading(false); // Stop loading
-    }, 300); // Simulate a delay for loading state
+      setIsLoading(false);
+    }, 500);
   };
-    
+
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = results.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(results.length / itemsPerPage);
-  
+
   return (
     <div className="container">
       <header className="app-header">
@@ -86,10 +155,9 @@ const SearchBar = () => {
           placeholder="Search artists, albums, or songs..."
           value={query}
           onFocus={() => setIsFocused(true)}
-          // The timeout gives the 'click' on a suggestion time to fire
           onBlur={() => setTimeout(() => setIsFocused(false), 500)}
           onKeyDown={(e) => e.key === 'Enter' && handleFinalSearch(query)}
-          onChange={(e) => setQuery(e.target.value)} // ONLY updates the text/dropdown
+          onChange={(e) => setQuery(e.target.value)}
         />
         <button 
           className="search-submit-btn"
@@ -113,15 +181,15 @@ const SearchBar = () => {
                       key={hit.id} 
                       className="mini-result-item" 
                       onMouseDown={() => {
-                        setQuery(hit.album);
-                        handleFinalSearch(hit.album);
+                        // setQuery(hit.title);
+                        handleFinalSearch(hit.title);
                         setIsFocused(false);
                       }}
                     >
                       <div className="mini-art">♪</div>
                       <div className="mini-text">
-                        <span className="mini-title">{hit.album}</span>
-                        <span className="mini-subtitle">{hit.name}</span>
+                        <span className="mini-title">{hit.title}</span>
+                        <span className="mini-subtitle">{hit.artist}</span>
                       </div>
                     </div>
                   ))}
@@ -150,7 +218,7 @@ const SearchBar = () => {
         {/* Show "Results for..." only if not loading and we have a search term */}
         {activeSearchTerm && !isLoading ? (
           <h2 className="results-title">
-            Showing {results.length} {results.length === 1 ? 'result' : 'results'} for "{activeSearchTerm}"
+            Showing {results.length} results for "{query}"
           </h2>
         ) : !activeSearchTerm && !isLoading ? (
           /* Show "All Albums" only when there is no active search and not loading */
@@ -171,7 +239,12 @@ const SearchBar = () => {
           <div className="results-grid">
             {currentItems.length > 0 ? (
               currentItems.map((item, index) => (
-                <SearchCard key={item.id} item={item} index={index} />
+              <SearchCard
+                  key={item.id}
+                  item={item}
+                  isPlaying={isPlaying}
+                  isCurrent={currentTrack?.id === item.id}
+                />
               ))
             ) : (
               <div className="no-results-state">

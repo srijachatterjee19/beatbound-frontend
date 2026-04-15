@@ -1,4 +1,4 @@
-# 🎵 Beatbound
+# Beatbound
 
 Beatbound is a high-performance music discovery dashboard built with **React** and **Redux**. It features a "search-as-you-type" experience optimized for speed and scalability, ensuring a smooth UI even when handling large datasets.
 
